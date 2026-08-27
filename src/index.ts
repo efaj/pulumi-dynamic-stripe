@@ -88,12 +88,14 @@ interface StripeProductArgs {
     apiKey: pulumi.Input<string>;
     name: pulumi.Input<string>;
     description?: pulumi.Input<string>;
+    taxCode?: pulumi.Input<string>;
 }
 
 interface StripeProductProviderArgs {
     apiKey: string;
     name: string;
     description?: string;
+    taxCode?: string;
 }
 
 export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
@@ -103,6 +105,7 @@ export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
         const product = await stripe.products.create({
             name: inputs.name,
             description: inputs.description,
+            tax_code: inputs.taxCode,
         });
         
         return {
@@ -120,6 +123,7 @@ export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
         await stripe.products.update(id, {
             name: news.name,
             description: news.description,
+            tax_code: news.taxCode,
         });
 
         return {

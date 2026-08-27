@@ -8,12 +8,12 @@ jest.mock("stripe");
 const MockedStripe = Stripe as jest.MockedClass<typeof Stripe>;
 
 describe("Stripe Providers", () => {
-    let mockPaymentLinksCreate: jest.Mock;
-    let mockPaymentLinksUpdate: jest.Mock;
-    let mockProductsCreate: jest.Mock;
-    let mockProductsUpdate: jest.Mock;
-    let mockPricesCreate: jest.Mock;
-    let mockPricesUpdate: jest.Mock;
+    let mockPaymentLinksCreate: jest.Mock<any>;
+    let mockPaymentLinksUpdate: jest.Mock<any>;
+    let mockProductsCreate: jest.Mock<any>;
+    let mockProductsUpdate: jest.Mock<any>;
+    let mockPricesCreate: jest.Mock<any>;
+    let mockPricesUpdate: jest.Mock<any>;
 
     beforeEach(() => {
         // Reset mocks before each test
@@ -48,155 +48,180 @@ describe("Stripe Providers", () => {
     });
 
     describe("StripePaymentLinkProvider", () => {
-        it("should correctly map Pulumi inputs to Stripe API payload on create", async () => {
-            const provider = new StripePaymentLinkProvider();
-            
-            const result = await provider.create({
-                apiKey: "sk_test_123",
-                priceId: "price_abc",
-                sparksAmount: "100",
-                redirectUrl: "https://example.com/success",
-                allowPromotionCodes: true,
-            });
+        const provider = new StripePaymentLinkProvider();
 
-            expect(result.id).toBe("plink_123");
-            expect(result.outs?.paymentLinkId).toBe("plink_123");
-            expect(result.outs?.url).toBe("https://stripe.com/plink_123");
-            
-            expect(MockedStripe).toHaveBeenCalledWith("sk_test_123", { apiVersion: '2022-11-15' as any });
-            expect(mockPaymentLinksCreate).toHaveBeenCalledWith({
-                line_items: [{
-                    price: "price_abc",
-                    quantity: 1,
-                    adjustable_quantity: {
-                        enabled: true,
-                        minimum: 1,
-                        maximum: 100,
+        describe("create", () => {
+            const createCases = [
+                {
+                    name: "all properties provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        priceId: "price_abc",
+                        sparksAmount: "100",
+                        redirectUrl: "https://example.com/success",
+                        allowPromotionCodes: true,
+                        managedPayments: true,
                     },
-                }],
-                after_completion: {
-                    type: 'redirect',
-                    redirect: {
-                        url: "https://example.com/success",
+                    expectedPayload: {
+                        line_items: [{
+                            price: "price_abc",
+                            quantity: 1,
+                            adjustable_quantity: { enabled: true, minimum: 1, maximum: 100 },
+                        }],
+                        after_completion: { type: 'redirect', redirect: { url: "https://example.com/success" } },
+                        allow_promotion_codes: true,
+                        managed_payments: { enabled: true },
+                        metadata: { sparks: "100" }
                     }
                 },
-                allow_promotion_codes: true,
-                metadata: {
-                    sparks: "100"
+                {
+                    name: "only required properties provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        priceId: "price_abc",
+                        sparksAmount: "50",
+                        redirectUrl: "https://example.com/success",
+                    },
+                    expectedPayload: {
+                        line_items: [{
+                            price: "price_abc",
+                            quantity: 1,
+                            adjustable_quantity: { enabled: true, minimum: 1, maximum: 100 },
+                        }],
+                        after_completion: { type: 'redirect', redirect: { url: "https://example.com/success" } },
+                        allow_promotion_codes: undefined,
+                        metadata: { sparks: "50" }
+                    }
                 }
+            ];
+
+            it.each(createCases)("should correctly map Pulumi inputs to Stripe API payload when $name", async ({ inputs, expectedPayload }) => {
+                const result = await provider.create(inputs as any);
+
+                expect(result.id).toBe("plink_123");
+                expect(result.outs?.paymentLinkId).toBe("plink_123");
+                expect(result.outs?.url).toBe("https://stripe.com/plink_123");
+                
+                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey, { apiVersion: '2022-11-15' as any });
+                expect(mockPaymentLinksCreate).toHaveBeenCalledWith(expectedPayload);
             });
         });
 
-        it("should include managed_payments when managedPayments is true", async () => {
-            const provider = new StripePaymentLinkProvider();
-            
-            await provider.create({
-                apiKey: "sk_test_123",
-                priceId: "price_abc",
-                sparksAmount: "100",
-                redirectUrl: "https://example.com/success",
-                managedPayments: true,
+        describe("delete", () => {
+            it("should deactivate the payment link", async () => {
+                await provider.delete("plink_123", { apiKey: "sk_test_123" } as any);
+                expect(mockPaymentLinksUpdate).toHaveBeenCalledWith("plink_123", { active: false });
             });
-
-            expect(mockPaymentLinksCreate).toHaveBeenCalledWith(expect.objectContaining({
-                managed_payments: { enabled: true }
-            }));
-        });
-
-        it("should deactivate the payment link on delete", async () => {
-            const provider = new StripePaymentLinkProvider();
-            
-            await provider.delete("plink_123", {
-                apiKey: "sk_test_123",
-                priceId: "price_abc",
-                sparksAmount: "100",
-                redirectUrl: "https://example.com/success",
-            });
-
-            expect(mockPaymentLinksUpdate).toHaveBeenCalledWith("plink_123", { active: false });
         });
     });
 
     describe("StripeProductProvider", () => {
-        it("should correctly create a product", async () => {
-            const provider = new StripeProductProvider();
-            
-            const result = await provider.create({
-                apiKey: "sk_test_123",
-                name: "Test Product",
-                description: "Test Description",
-            });
+        const provider = new StripeProductProvider();
 
-            expect(result.id).toBe("prod_123");
-            expect(result.outs?.productId).toBe("prod_123");
-            
-            expect(mockProductsCreate).toHaveBeenCalledWith({
-                name: "Test Product",
-                description: "Test Description",
+        describe("create", () => {
+            const createCases = [
+                {
+                    name: "all properties provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        name: "Full Product",
+                        description: "A complete product",
+                        taxCode: "txcd_123",
+                    },
+                    expectedPayload: {
+                        name: "Full Product",
+                        description: "A complete product",
+                        tax_code: "txcd_123",
+                    }
+                },
+                {
+                    name: "only required properties provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        name: "Minimal Product",
+                    },
+                    expectedPayload: {
+                        name: "Minimal Product",
+                        description: undefined,
+                        tax_code: undefined,
+                    }
+                }
+            ];
+
+            it.each(createCases)("should correctly create a product when $name", async ({ inputs, expectedPayload }) => {
+                const result = await provider.create(inputs as any);
+
+                expect(result.id).toBe("prod_123");
+                expect(result.outs?.productId).toBe("prod_123");
+                
+                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey, { apiVersion: '2022-11-15' as any });
+                expect(mockProductsCreate).toHaveBeenCalledWith(expectedPayload);
             });
         });
 
-        it("should correctly update a product", async () => {
-            const provider = new StripeProductProvider();
-            
-            const result = await provider.update("prod_123", 
-                { apiKey: "sk_test_123", name: "Old Name" },
-                { apiKey: "sk_test_123", name: "New Name", description: "New Desc" }
-            );
+        describe("update", () => {
+            it("should correctly update a product", async () => {
+                const result = await provider.update("prod_123", 
+                    { apiKey: "sk_test_123", name: "Old Name" } as any,
+                    { apiKey: "sk_test_123", name: "New Name", description: "New Desc", taxCode: "txcd_999" } as any
+                );
 
-            expect(result.outs?.productId).toBe("prod_123");
-            expect(result.outs?.name).toBe("New Name");
-            
-            expect(mockProductsUpdate).toHaveBeenCalledWith("prod_123", {
-                name: "New Name",
-                description: "New Desc",
+                expect(result.outs?.productId).toBe("prod_123");
+                expect(result.outs?.name).toBe("New Name");
+                
+                expect(mockProductsUpdate).toHaveBeenCalledWith("prod_123", {
+                    name: "New Name",
+                    description: "New Desc",
+                    tax_code: "txcd_999",
+                });
             });
         });
 
-        it("should deactivate the product on delete", async () => {
-            const provider = new StripeProductProvider();
-            
-            await provider.delete("prod_123", {
-                apiKey: "sk_test_123",
-                name: "Test Product",
+        describe("delete", () => {
+            it("should deactivate the product on delete", async () => {
+                await provider.delete("prod_123", { apiKey: "sk_test_123" } as any);
+                expect(mockProductsUpdate).toHaveBeenCalledWith("prod_123", { active: false });
             });
-
-            expect(mockProductsUpdate).toHaveBeenCalledWith("prod_123", { active: false });
         });
     });
 
     describe("StripePriceProvider", () => {
-        it("should correctly create a price", async () => {
-            const provider = new StripePriceProvider();
-            
-            const result = await provider.create({
-                apiKey: "sk_test_123",
-                productId: "prod_123",
-                unitAmount: 1000,
-                currency: "usd",
-            });
+        const provider = new StripePriceProvider();
 
-            expect(result.id).toBe("price_123");
-            expect(result.outs?.priceId).toBe("price_123");
-            
-            expect(mockPricesCreate).toHaveBeenCalledWith({
-                product: "prod_123",
-                unit_amount: 1000,
-                currency: "usd",
+        describe("create", () => {
+            const createCases = [
+                {
+                    name: "required properties provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        productId: "prod_123",
+                        unitAmount: 1000,
+                        currency: "usd",
+                    },
+                    expectedPayload: {
+                        product: "prod_123",
+                        unit_amount: 1000,
+                        currency: "usd",
+                    }
+                }
+            ];
+
+            it.each(createCases)("should correctly create a price when $name", async ({ inputs, expectedPayload }) => {
+                const result = await provider.create(inputs as any);
+
+                expect(result.id).toBe("price_123");
+                expect(result.outs?.priceId).toBe("price_123");
+                
+                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey, { apiVersion: '2022-11-15' as any });
+                expect(mockPricesCreate).toHaveBeenCalledWith(expectedPayload);
             });
         });
 
-        it("should deactivate the price on delete", async () => {
-            const provider = new StripePriceProvider();
-            
-            await provider.delete("price_123", {
-                apiKey: "sk_test_123",
-                productId: "prod_123",
-                unitAmount: 1000,
-                currency: "usd",
+        describe("delete", () => {
+            it("should deactivate the price on delete", async () => {
+                await provider.delete("price_123", { apiKey: "sk_test_123" } as any);
+                expect(mockPricesUpdate).toHaveBeenCalledWith("price_123", { active: false });
             });
-
-            expect(mockPricesUpdate).toHaveBeenCalledWith("price_123", { active: false });
         });
     });
 });
