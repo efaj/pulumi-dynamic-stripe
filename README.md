@@ -1,7 +1,7 @@
 # pulumi-dynamic-stripe
 
-![NPM Version](https://img.shields.io/npm/v/pulumi-dynamic-stripe)
-![License](https://img.shields.io/npm/l/pulumi-dynamic-stripe)
+![NPM Version](https://img.shields.io/npm/v/@efaj/pulumi-dynamic-stripe)
+![License](https://img.shields.io/npm/l/@efaj/pulumi-dynamic-stripe)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fefaj%2Fpulumi-dynamic-stripe.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fefaj%2Fpulumi-dynamic-stripe?ref=badge_shield)
 
 A native Pulumi Dynamic Provider for Stripe.
@@ -28,7 +28,7 @@ Contributions to add more dynamic providers for other Stripe resources are highl
 ## Installation
 
 ```bash
-npm install pulumi-dynamic-stripe
+npm install @efaj/pulumi-dynamic-stripe
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ Here is a full example of provisioning a Product, attaching a Price to it, and g
 
 ```typescript
 import * as pulumi from "@pulumi/pulumi";
-import { Product, Price, PaymentLink } from "pulumi-dynamic-stripe";
+import { Product, Price, PaymentLink } from "@efaj/pulumi-dynamic-stripe";
 
 const config = new pulumi.Config();
 const stripeApiKey = config.requireSecret("stripeApiKey");
