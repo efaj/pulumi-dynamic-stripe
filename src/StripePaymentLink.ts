@@ -21,7 +21,7 @@ export interface StripePaymentLinkProviderArgs {
 
 export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvider {
     async create(inputs: StripePaymentLinkProviderArgs): Promise<pulumi.dynamic.CreateResult> {
-        const stripe = new Stripe(inputs.apiKey, { apiVersion: '2022-11-15' as any });
+        const stripe = new Stripe(inputs.apiKey);
         
         const paymentLink = await stripe.paymentLinks.create({
             line_items: [{
@@ -73,7 +73,7 @@ export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvide
     }
 
     async delete(id: string, props: StripePaymentLinkProviderArgs): Promise<void> {
-        const stripe = new Stripe(props.apiKey, { apiVersion: '2022-11-15' as any });
+        const stripe = new Stripe(props.apiKey);
         await stripe.paymentLinks.update(id, { active: false });
     }
 }

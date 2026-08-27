@@ -17,7 +17,7 @@ export interface StripePriceProviderArgs {
 
 export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
     async create(inputs: StripePriceProviderArgs): Promise<pulumi.dynamic.CreateResult> {
-        const stripe = new Stripe(inputs.apiKey, { apiVersion: '2022-11-15' as any });
+        const stripe = new Stripe(inputs.apiKey);
         
         const price = await stripe.prices.create({
             product: inputs.productId,
@@ -49,7 +49,7 @@ export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
     }
 
     async delete(id: string, props: StripePriceProviderArgs): Promise<void> {
-        const stripe = new Stripe(props.apiKey, { apiVersion: '2022-11-15' as any });
+        const stripe = new Stripe(props.apiKey);
         await stripe.prices.update(id, { active: false });
     }
 }
