@@ -107,6 +107,39 @@ describe("Stripe Providers", () => {
             });
         });
 
+        describe("diff", () => {
+            const diffCases = [
+                {
+                    name: "all properties change",
+                    olds: { priceId: "old", sparksAmount: "10", redirectUrl: "url1", allowPromotionCodes: false, managedPayments: false, apiKey: "old_key" },
+                    news: { priceId: "new", sparksAmount: "20", redirectUrl: "url2", allowPromotionCodes: true, managedPayments: true, apiKey: "new_key" },
+                    expectedChanges: true,
+                    expectedReplaces: ["priceId", "sparksAmount", "redirectUrl", "allowPromotionCodes", "managedPayments", "apiKey"]
+                },
+                {
+                    name: "some properties change",
+                    olds: { priceId: "old", sparksAmount: "10", redirectUrl: "url1" },
+                    news: { priceId: "old", sparksAmount: "20", redirectUrl: "url1" },
+                    expectedChanges: true,
+                    expectedReplaces: ["sparksAmount"]
+                },
+                {
+                    name: "no properties change",
+                    olds: { priceId: "same", sparksAmount: "10" },
+                    news: { priceId: "same", sparksAmount: "10" },
+                    expectedChanges: false,
+                    expectedReplaces: []
+                }
+            ];
+
+            it.each(diffCases)("should correctly detect diff when $name", async ({ olds, news, expectedChanges, expectedReplaces }) => {
+                const diffResult = await provider.diff("plink_123", olds as any, news as any);
+                expect(diffResult.changes).toBe(expectedChanges);
+                expect(diffResult.replaces).toEqual(expect.arrayContaining(expectedReplaces));
+                expect(diffResult.replaces?.length).toBe(expectedReplaces.length);
+            });
+        });
+
         describe("delete", () => {
             it("should deactivate the payment link", async () => {
                 await provider.delete("plink_123", { apiKey: "sk_test_123" } as any);
@@ -156,6 +189,35 @@ describe("Stripe Providers", () => {
                 
                 expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey, { apiVersion: '2022-11-15' as any });
                 expect(mockProductsCreate).toHaveBeenCalledWith(expectedPayload);
+            });
+        });
+
+        describe("diff", () => {
+            const diffCases = [
+                {
+                    name: "all properties change",
+                    olds: { name: "old name", description: "old desc", taxCode: "tx_1", apiKey: "old_key" },
+                    news: { name: "new name", description: "new desc", taxCode: "tx_2", apiKey: "new_key" },
+                    expectedChanges: true,
+                },
+                {
+                    name: "some properties change",
+                    olds: { name: "old name", description: "old desc" },
+                    news: { name: "old name", description: "new desc" },
+                    expectedChanges: true,
+                },
+                {
+                    name: "no properties change",
+                    olds: { name: "same name", description: "same desc" },
+                    news: { name: "same name", description: "same desc" },
+                    expectedChanges: false,
+                }
+            ];
+
+            it.each(diffCases)("should correctly detect diff when $name", async ({ olds, news, expectedChanges }) => {
+                const diffResult = await provider.diff("prod_123", olds as any, news as any);
+                expect(diffResult.changes).toBe(expectedChanges);
+                expect(diffResult.replaces).toHaveLength(0);
             });
         });
 
@@ -214,6 +276,39 @@ describe("Stripe Providers", () => {
                 
                 expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey, { apiVersion: '2022-11-15' as any });
                 expect(mockPricesCreate).toHaveBeenCalledWith(expectedPayload);
+            });
+        });
+
+        describe("diff", () => {
+            const diffCases = [
+                {
+                    name: "all properties change",
+                    olds: { productId: "prod_1", unitAmount: 100, currency: "usd", apiKey: "old_key" },
+                    news: { productId: "prod_2", unitAmount: 200, currency: "eur", apiKey: "new_key" },
+                    expectedChanges: true,
+                    expectedReplaces: ["productId", "unitAmount", "currency", "apiKey"]
+                },
+                {
+                    name: "some properties change",
+                    olds: { productId: "prod_1", unitAmount: 100, currency: "usd" },
+                    news: { productId: "prod_1", unitAmount: 200, currency: "usd" },
+                    expectedChanges: true,
+                    expectedReplaces: ["unitAmount"]
+                },
+                {
+                    name: "no properties change",
+                    olds: { productId: "prod_1", unitAmount: 100, currency: "usd" },
+                    news: { productId: "prod_1", unitAmount: 100, currency: "usd" },
+                    expectedChanges: false,
+                    expectedReplaces: []
+                }
+            ];
+
+            it.each(diffCases)("should correctly detect diff when $name", async ({ olds, news, expectedChanges, expectedReplaces }) => {
+                const diffResult = await provider.diff("price_123", olds as any, news as any);
+                expect(diffResult.changes).toBe(expectedChanges);
+                expect(diffResult.replaces).toEqual(expect.arrayContaining(expectedReplaces));
+                expect(diffResult.replaces?.length).toBe(expectedReplaces.length);
             });
         });
 
