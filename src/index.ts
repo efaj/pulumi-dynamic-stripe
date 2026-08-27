@@ -18,7 +18,7 @@ interface StripePaymentLinkProviderArgs {
     allowPromotionCodes?: boolean;
 }
 
-class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvider {
+export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvider {
     async create(inputs: StripePaymentLinkProviderArgs): Promise<pulumi.dynamic.CreateResult> {
         const stripe = new Stripe(inputs.apiKey, { apiVersion: '2022-11-15' as any }); // Using older API version to avoid typings mismatch if any
         
@@ -92,7 +92,7 @@ interface StripeProductProviderArgs {
     description?: string;
 }
 
-class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
+export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
     async create(inputs: StripeProductProviderArgs): Promise<pulumi.dynamic.CreateResult> {
         const stripe = new Stripe(inputs.apiKey, { apiVersion: '2022-11-15' as any });
         
@@ -154,7 +154,7 @@ interface StripePriceProviderArgs {
     currency: string;
 }
 
-class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
+export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
     async create(inputs: StripePriceProviderArgs): Promise<pulumi.dynamic.CreateResult> {
         const stripe = new Stripe(inputs.apiKey, { apiVersion: '2022-11-15' as any });
         
