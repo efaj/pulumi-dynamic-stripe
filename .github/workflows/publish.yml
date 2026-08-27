@@ -33,10 +33,16 @@ jobs:
         run: npm run build
 
       - name: Update version with SHA
+        if: github.event_name == 'push'
         run: |
           VERSION=$(node -p "require('./package.json').version")
           SHORT_SHA=${GITHUB_SHA::7}
           npm version $VERSION-$SHORT_SHA --no-git-tag-version
 
-      - name: Publish to NPM
+      - name: Publish to NPM (Push/Canary)
+        if: github.event_name == 'push'
+        run: npm publish --access public --provenance --tag canary
+
+      - name: Publish to NPM (Release)
+        if: github.event_name == 'release'
         run: npm publish --access public --provenance
