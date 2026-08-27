@@ -22,17 +22,15 @@
   "scripts": {
     "build": "tsc",
     "prepare": "tsc",
-    "test": "jest"
+    "test": "vitest run"
   },
   "dependencies": {
     "@pulumi/pulumi": "^3.259.0",
     "stripe": "^22.6.0"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
     "@types/node": "^26.4.0",
-    "jest": "^30.4.2",
-    "ts-jest": "^29.4.12",
-    "typescript": "^6.0.3"
+    "vitest": "^2.0.5",
+    "typescript": "^7.0.2"
   }
 }

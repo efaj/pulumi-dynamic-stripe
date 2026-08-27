@@ -1,32 +1,33 @@
 import { StripePaymentLinkProvider, StripeProductProvider, StripePriceProvider } from "../src/index";
 import Stripe from "stripe";
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { Mock } from 'vitest';
 
 // Mock the Stripe SDK
-jest.mock("stripe");
+vi.mock("stripe");
 
-const MockedStripe = Stripe as jest.MockedClass<typeof Stripe>;
+const MockedStripe = Stripe as any;
 
 describe("Stripe Providers", () => {
-    let mockPaymentLinksCreate: jest.Mock<any>;
-    let mockPaymentLinksUpdate: jest.Mock<any>;
-    let mockProductsCreate: jest.Mock<any>;
-    let mockProductsUpdate: jest.Mock<any>;
-    let mockPricesCreate: jest.Mock<any>;
-    let mockPricesUpdate: jest.Mock<any>;
+    let mockPaymentLinksCreate: Mock<any>;
+    let mockPaymentLinksUpdate: Mock<any>;
+    let mockProductsCreate: Mock<any>;
+    let mockProductsUpdate: Mock<any>;
+    let mockPricesCreate: Mock<any>;
+    let mockPricesUpdate: Mock<any>;
 
     beforeEach(() => {
         // Reset mocks before each test
-        jest.clearAllMocks();
+        vi.clearAllMocks();
 
-        mockPaymentLinksCreate = jest.fn<any>().mockResolvedValue({ id: "plink_123", url: "https://stripe.com/plink_123" } as any);
-        mockPaymentLinksUpdate = jest.fn<any>().mockResolvedValue({ id: "plink_123" } as any);
+        mockPaymentLinksCreate = vi.fn<any>().mockResolvedValue({ id: "plink_123", url: "https://stripe.com/plink_123" } as any);
+        mockPaymentLinksUpdate = vi.fn<any>().mockResolvedValue({ id: "plink_123" } as any);
         
-        mockProductsCreate = jest.fn<any>().mockResolvedValue({ id: "prod_123" } as any);
-        mockProductsUpdate = jest.fn<any>().mockResolvedValue({ id: "prod_123" } as any);
+        mockProductsCreate = vi.fn<any>().mockResolvedValue({ id: "prod_123" } as any);
+        mockProductsUpdate = vi.fn<any>().mockResolvedValue({ id: "prod_123" } as any);
         
-        mockPricesCreate = jest.fn<any>().mockResolvedValue({ id: "price_123" } as any);
-        mockPricesUpdate = jest.fn<any>().mockResolvedValue({ id: "price_123" } as any);
+        mockPricesCreate = vi.fn<any>().mockResolvedValue({ id: "price_123" } as any);
+        mockPricesUpdate = vi.fn<any>().mockResolvedValue({ id: "price_123" } as any);
 
         // Setup the mocked Stripe instance's internal resource objects
         MockedStripe.mockImplementation(() => {
@@ -102,7 +103,7 @@ describe("Stripe Providers", () => {
                 expect(result.outs?.paymentLinkId).toBe("plink_123");
                 expect(result.outs?.url).toBe("https://stripe.com/plink_123");
                 
-                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey, { apiVersion: '2022-11-15' as any });
+                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey);
                 expect(mockPaymentLinksCreate).toHaveBeenCalledWith(expectedPayload);
             });
         });
@@ -187,7 +188,7 @@ describe("Stripe Providers", () => {
                 expect(result.id).toBe("prod_123");
                 expect(result.outs?.productId).toBe("prod_123");
                 
-                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey, { apiVersion: '2022-11-15' as any });
+                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey);
                 expect(mockProductsCreate).toHaveBeenCalledWith(expectedPayload);
             });
         });
@@ -274,7 +275,7 @@ describe("Stripe Providers", () => {
                 expect(result.id).toBe("price_123");
                 expect(result.outs?.priceId).toBe("price_123");
                 
-                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey, { apiVersion: '2022-11-15' as any });
+                expect(MockedStripe).toHaveBeenCalledWith(inputs.apiKey);
                 expect(mockPricesCreate).toHaveBeenCalledWith(expectedPayload);
             });
         });
