@@ -71,3 +71,18 @@ export const paymentUrl = premiumPaymentLink.url;
 ## How it works
 
 Behind the scenes, this library defines custom Pulumi Dynamic Resource Providers that implement the CRUD operations for Stripe entities via the `@pulumi/pulumi` and `stripe` Node packages.
+
+## Development
+
+If you wish to contribute or build the project locally, please use the provided `Makefile`.
+
+```bash
+# Install dependencies
+make install
+
+# Build the TypeScript source
+make build
+
+# Run the Vitest test suite
+make test
+```

@@ -3,7 +3,7 @@
 all: install build test
 
 install:
-	npm install --legacy-peer-deps
+	npm install
 
 build:
 	npm run build
