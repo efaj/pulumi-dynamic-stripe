@@ -20,8 +20,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Filter out devDependencies
+        run: |
+          npm pkg delete devDependencies
+          npm install --package-lock-only
+          npm ci
 
       - name: Run FOSSA scan
         uses: fossas/fossa-action@main
