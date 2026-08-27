@@ -25,7 +25,7 @@ jobs:
         run: |
           npm pkg delete devDependencies
           npm install --package-lock-only
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Run FOSSA scan
         uses: fossas/fossa-action@main
