@@ -87,6 +87,22 @@ describe("Stripe Providers", () => {
             });
         });
 
+        it("should include managed_payments when managedPayments is true", async () => {
+            const provider = new StripePaymentLinkProvider();
+            
+            await provider.create({
+                apiKey: "sk_test_123",
+                priceId: "price_abc",
+                sparksAmount: "100",
+                redirectUrl: "https://example.com/success",
+                managedPayments: true,
+            });
+
+            expect(mockPaymentLinksCreate).toHaveBeenCalledWith(expect.objectContaining({
+                managed_payments: { enabled: true }
+            }));
+        });
+
         it("should deactivate the payment link on delete", async () => {
             const provider = new StripePaymentLinkProvider();
             

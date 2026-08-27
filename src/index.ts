@@ -8,6 +8,7 @@ interface StripePaymentLinkArgs {
     sparksAmount: pulumi.Input<string>;
     redirectUrl: pulumi.Input<string>;
     allowPromotionCodes?: pulumi.Input<boolean>;
+    managedPayments?: pulumi.Input<boolean>;
 }
 
 interface StripePaymentLinkProviderArgs {
@@ -16,6 +17,7 @@ interface StripePaymentLinkProviderArgs {
     sparksAmount: string;
     redirectUrl: string;
     allowPromotionCodes?: boolean;
+    managedPayments?: boolean;
 }
 
 export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvider {
@@ -39,6 +41,7 @@ export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvide
                 }
             },
             allow_promotion_codes: inputs.allowPromotionCodes,
+            ...(inputs.managedPayments ? { managed_payments: { enabled: true } } : {}),
             metadata: {
                 sparks: inputs.sparksAmount
             }
@@ -74,6 +77,7 @@ export class PaymentLink extends pulumi.dynamic.Resource {
             sparksAmount: args.sparksAmount,
             redirectUrl: args.redirectUrl,
             allowPromotionCodes: args.allowPromotionCodes,
+            managedPayments: args.managedPayments,
             paymentLinkId: undefined,
             url: undefined,
         }, opts);
