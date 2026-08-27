@@ -72,6 +72,14 @@ export const paymentUrl = premiumPaymentLink.url;
 
 Behind the scenes, this library defines custom Pulumi Dynamic Resource Providers that implement the CRUD operations for Stripe entities via the `@pulumi/pulumi` and `stripe` Node packages.
 
+## Resource Deletion & State Fallbacks
+
+Stripe entities generally cannot be hard-deleted via the API; instead, this provider safely **deactivates** them (e.g., setting `active: false` on Payment Links, Products, and Prices) when Pulumi destroys the resource.
+
+Due to the way Pulumi manages dynamic provider state, if an input property like `apiKey` is not explicitly declared as a public output on the resource class, it may be scrubbed from the state file. When Pulumi attempts to delete a replaced or destroyed resource, it reads from the old state. If the `apiKey` is missing from the state during deletion, the provider will gracefully attempt to fall back to the `STRIPE_SECRET_KEY` or `STRIPE_API_KEY` environment variables. 
+
+If no API key is found in the state or environment variables, the provider will log a warning and **skip the Stripe deactivation (NoOp)** to allow Pulumi to successfully finish deleting the resource from its internal state without crashing.
+
 ## Development
 
 If you wish to contribute or build the project locally, please use the provided `Makefile`.

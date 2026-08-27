@@ -142,9 +142,85 @@ describe("Stripe Providers", () => {
         });
 
         describe("delete", () => {
-            it("should deactivate the payment link", async () => {
-                await provider.delete("plink_123", { apiKey: "sk_test_123" } as any);
-                expect(mockPaymentLinksUpdate).toHaveBeenCalledWith("plink_123", { active: false });
+            const deleteCases = [
+                {
+                    name: "apiKey is in state",
+                    state: { apiKey: "sk_test_state" },
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: "sk_test_state",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing, falls back to STRIPE_SECRET_KEY",
+                    state: {},
+                    envSecret: "sk_test_secret",
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: "sk_test_secret",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing, falls back to STRIPE_API_KEY",
+                    state: {},
+                    envSecret: undefined,
+                    envApi: "sk_test_api",
+                    mockError: false,
+                    expectStripeInit: "sk_test_api",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing everywhere (NoOp)",
+                    state: {},
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: null,
+                    expectUpdate: false,
+                },
+                {
+                    name: "Stripe SDK throws an error (caught safely)",
+                    state: { apiKey: "sk_test_error" },
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: true,
+                    expectStripeInit: "sk_test_error",
+                    expectUpdate: true,
+                }
+            ];
+
+            it.each(deleteCases)("should handle deletion when $name", async ({ state, envSecret, envApi, mockError, expectStripeInit, expectUpdate }) => {
+                const originalSecret = process.env.STRIPE_SECRET_KEY;
+                const originalApi = process.env.STRIPE_API_KEY;
+                
+                if (envSecret !== undefined) process.env.STRIPE_SECRET_KEY = envSecret;
+                else delete process.env.STRIPE_SECRET_KEY;
+
+                if (envApi !== undefined) process.env.STRIPE_API_KEY = envApi;
+                else delete process.env.STRIPE_API_KEY;
+
+                if (mockError) {
+                    mockPaymentLinksUpdate.mockRejectedValueOnce(new Error("Stripe error"));
+                }
+
+                await provider.delete("plink_123", state as any);
+
+                if (expectStripeInit) {
+                    expect(MockedStripe).toHaveBeenCalledWith(expectStripeInit);
+                }
+                
+                if (expectUpdate) {
+                    expect(mockPaymentLinksUpdate).toHaveBeenCalledWith("plink_123", { active: false });
+                } else {
+                    expect(mockPaymentLinksUpdate).not.toHaveBeenCalled();
+                }
+
+                if (originalSecret !== undefined) process.env.STRIPE_SECRET_KEY = originalSecret;
+                else delete process.env.STRIPE_SECRET_KEY;
+                
+                if (originalApi !== undefined) process.env.STRIPE_API_KEY = originalApi;
+                else delete process.env.STRIPE_API_KEY;
             });
         });
     });
@@ -241,9 +317,85 @@ describe("Stripe Providers", () => {
         });
 
         describe("delete", () => {
-            it("should deactivate the product on delete", async () => {
-                await provider.delete("prod_123", { apiKey: "sk_test_123" } as any);
-                expect(mockProductsUpdate).toHaveBeenCalledWith("prod_123", { active: false });
+            const deleteCases = [
+                {
+                    name: "apiKey is in state",
+                    state: { apiKey: "sk_test_state" },
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: "sk_test_state",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing, falls back to STRIPE_SECRET_KEY",
+                    state: {},
+                    envSecret: "sk_test_secret",
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: "sk_test_secret",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing, falls back to STRIPE_API_KEY",
+                    state: {},
+                    envSecret: undefined,
+                    envApi: "sk_test_api",
+                    mockError: false,
+                    expectStripeInit: "sk_test_api",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing everywhere (NoOp)",
+                    state: {},
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: null,
+                    expectUpdate: false,
+                },
+                {
+                    name: "Stripe SDK throws an error (caught safely)",
+                    state: { apiKey: "sk_test_error" },
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: true,
+                    expectStripeInit: "sk_test_error",
+                    expectUpdate: true,
+                }
+            ];
+
+            it.each(deleteCases)("should handle deletion when $name", async ({ state, envSecret, envApi, mockError, expectStripeInit, expectUpdate }) => {
+                const originalSecret = process.env.STRIPE_SECRET_KEY;
+                const originalApi = process.env.STRIPE_API_KEY;
+                
+                if (envSecret !== undefined) process.env.STRIPE_SECRET_KEY = envSecret;
+                else delete process.env.STRIPE_SECRET_KEY;
+
+                if (envApi !== undefined) process.env.STRIPE_API_KEY = envApi;
+                else delete process.env.STRIPE_API_KEY;
+
+                if (mockError) {
+                    mockProductsUpdate.mockRejectedValueOnce(new Error("Stripe error"));
+                }
+
+                await provider.delete("prod_123", state as any);
+
+                if (expectStripeInit) {
+                    expect(MockedStripe).toHaveBeenCalledWith(expectStripeInit);
+                }
+                
+                if (expectUpdate) {
+                    expect(mockProductsUpdate).toHaveBeenCalledWith("prod_123", { active: false });
+                } else {
+                    expect(mockProductsUpdate).not.toHaveBeenCalled();
+                }
+
+                if (originalSecret !== undefined) process.env.STRIPE_SECRET_KEY = originalSecret;
+                else delete process.env.STRIPE_SECRET_KEY;
+                
+                if (originalApi !== undefined) process.env.STRIPE_API_KEY = originalApi;
+                else delete process.env.STRIPE_API_KEY;
             });
         });
     });
@@ -314,9 +466,85 @@ describe("Stripe Providers", () => {
         });
 
         describe("delete", () => {
-            it("should deactivate the price on delete", async () => {
-                await provider.delete("price_123", { apiKey: "sk_test_123" } as any);
-                expect(mockPricesUpdate).toHaveBeenCalledWith("price_123", { active: false });
+            const deleteCases = [
+                {
+                    name: "apiKey is in state",
+                    state: { apiKey: "sk_test_state" },
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: "sk_test_state",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing, falls back to STRIPE_SECRET_KEY",
+                    state: {},
+                    envSecret: "sk_test_secret",
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: "sk_test_secret",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing, falls back to STRIPE_API_KEY",
+                    state: {},
+                    envSecret: undefined,
+                    envApi: "sk_test_api",
+                    mockError: false,
+                    expectStripeInit: "sk_test_api",
+                    expectUpdate: true,
+                },
+                {
+                    name: "apiKey is missing everywhere (NoOp)",
+                    state: {},
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: false,
+                    expectStripeInit: null,
+                    expectUpdate: false,
+                },
+                {
+                    name: "Stripe SDK throws an error (caught safely)",
+                    state: { apiKey: "sk_test_error" },
+                    envSecret: undefined,
+                    envApi: undefined,
+                    mockError: true,
+                    expectStripeInit: "sk_test_error",
+                    expectUpdate: true,
+                }
+            ];
+
+            it.each(deleteCases)("should handle deletion when $name", async ({ state, envSecret, envApi, mockError, expectStripeInit, expectUpdate }) => {
+                const originalSecret = process.env.STRIPE_SECRET_KEY;
+                const originalApi = process.env.STRIPE_API_KEY;
+                
+                if (envSecret !== undefined) process.env.STRIPE_SECRET_KEY = envSecret;
+                else delete process.env.STRIPE_SECRET_KEY;
+
+                if (envApi !== undefined) process.env.STRIPE_API_KEY = envApi;
+                else delete process.env.STRIPE_API_KEY;
+
+                if (mockError) {
+                    mockPricesUpdate.mockRejectedValueOnce(new Error("Stripe error"));
+                }
+
+                await provider.delete("price_123", state as any);
+
+                if (expectStripeInit) {
+                    expect(MockedStripe).toHaveBeenCalledWith(expectStripeInit);
+                }
+                
+                if (expectUpdate) {
+                    expect(mockPricesUpdate).toHaveBeenCalledWith("price_123", { active: false });
+                } else {
+                    expect(mockPricesUpdate).not.toHaveBeenCalled();
+                }
+
+                if (originalSecret !== undefined) process.env.STRIPE_SECRET_KEY = originalSecret;
+                else delete process.env.STRIPE_SECRET_KEY;
+                
+                if (originalApi !== undefined) process.env.STRIPE_API_KEY = originalApi;
+                else delete process.env.STRIPE_API_KEY;
             });
         });
     });

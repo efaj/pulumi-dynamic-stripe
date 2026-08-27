@@ -66,8 +66,17 @@ export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
     }
 
     async delete(id: string, props: StripeProductProviderArgs): Promise<void> {
-        const stripe = new Stripe(props.apiKey);
-        await stripe.products.update(id, { active: false });
+        const apiKey = props.apiKey || process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
+        if (!apiKey) {
+            console.warn(`[StripeProductProvider] Skipping deletion of ${id} due to missing apiKey in state and environment variables.`);
+            return;
+        }
+        try {
+            const stripe = new Stripe(apiKey);
+            await stripe.products.update(id, { active: false });
+        } catch (error) {
+            console.warn(`[StripeProductProvider] Failed to deactivate product ${id}:`, error);
+        }
     }
 }
 
