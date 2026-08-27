@@ -6,12 +6,16 @@ interface StripePaymentLinkArgs {
     apiKey: pulumi.Input<string>;
     priceId: pulumi.Input<string>;
     sparksAmount: pulumi.Input<string>;
+    redirectUrl: pulumi.Input<string>;
+    allowPromotionCodes?: pulumi.Input<boolean>;
 }
 
 interface StripePaymentLinkProviderArgs {
     apiKey: string;
     priceId: string;
     sparksAmount: string;
+    redirectUrl: string;
+    allowPromotionCodes?: boolean;
 }
 
 class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvider {
@@ -22,7 +26,19 @@ class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvider {
             line_items: [{
                 price: inputs.priceId,
                 quantity: 1,
+                adjustable_quantity: {
+                    enabled: true,
+                    minimum: 1,
+                    maximum: 100,
+                },
             }],
+            after_completion: {
+                type: 'redirect',
+                redirect: {
+                    url: inputs.redirectUrl,
+                }
+            },
+            allow_promotion_codes: inputs.allowPromotionCodes,
             metadata: {
                 sparks: inputs.sparksAmount
             }
@@ -45,12 +61,22 @@ class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvider {
     }
 }
 
+const stripePaymentLinkProvider = new StripePaymentLinkProvider();
+
 export class PaymentLink extends pulumi.dynamic.Resource {
     declare public readonly url: pulumi.Output<string>;
     declare public readonly paymentLinkId: pulumi.Output<string>;
 
     constructor(name: string, args: StripePaymentLinkArgs, opts?: any) {
-        super(new StripePaymentLinkProvider(), name, { ...args, url: undefined, paymentLinkId: undefined }, opts);
+        super(stripePaymentLinkProvider, name, {
+            apiKey: args.apiKey,
+            priceId: args.priceId,
+            sparksAmount: args.sparksAmount,
+            redirectUrl: args.redirectUrl,
+            allowPromotionCodes: args.allowPromotionCodes,
+            paymentLinkId: undefined,
+            url: undefined,
+        }, opts);
     }
 }
 
