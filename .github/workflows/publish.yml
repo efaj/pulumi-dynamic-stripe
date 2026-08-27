@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -46,3 +46,13 @@ jobs:
       - name: Publish to NPM (Release)
         if: github.event_name == 'release'
         run: npm publish --access public --provenance
+
+      - name: Pack NPM package
+        if: github.event_name == 'release'
+        run: npm pack
+
+      - name: Upload Release Asset
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "*.tgz"
