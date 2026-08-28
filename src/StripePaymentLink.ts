@@ -1,5 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import Stripe from "stripe";
+import { safeDeactivateStripeResource } from "./utils";
 
 export interface StripePaymentLinkArgs {
     apiKey: pulumi.Input<string>;
@@ -73,17 +74,12 @@ export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvide
     }
 
     async delete(id: string, props: StripePaymentLinkProviderArgs): Promise<void> {
-        const apiKey = props.apiKey || process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
-        if (!apiKey) {
-            console.warn(`[StripePaymentLinkProvider] Skipping deletion of ${id} due to missing apiKey in state and environment variables.`);
-            return;
-        }
-        try {
-            const stripe = new Stripe(apiKey);
-            await stripe.paymentLinks.update(id, { active: false });
-        } catch (error) {
-            console.warn(`[StripePaymentLinkProvider] Failed to deactivate payment link ${id}:`, error);
-        }
+        await safeDeactivateStripeResource(
+            "StripePaymentLinkProvider",
+            id,
+            props.apiKey,
+            async (stripe) => { await stripe.paymentLinks.update(id, { active: false }); }
+        );
     }
 }
 

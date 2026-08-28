@@ -1,5 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import Stripe from "stripe";
+import { safeDeactivateStripeResource } from "./utils";
 
 export interface StripeProductArgs {
     apiKey: pulumi.Input<string>;
@@ -66,17 +67,12 @@ export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
     }
 
     async delete(id: string, props: StripeProductProviderArgs): Promise<void> {
-        const apiKey = props.apiKey || process.env.STRIPE_SECRET_KEY || process.env.STRIPE_API_KEY;
-        if (!apiKey) {
-            console.warn(`[StripeProductProvider] Skipping deletion of ${id} due to missing apiKey in state and environment variables.`);
-            return;
-        }
-        try {
-            const stripe = new Stripe(apiKey);
-            await stripe.products.update(id, { active: false });
-        } catch (error) {
-            console.warn(`[StripeProductProvider] Failed to deactivate product ${id}:`, error);
-        }
+        await safeDeactivateStripeResource(
+            "StripeProductProvider",
+            id,
+            props.apiKey,
+            async (stripe) => { await stripe.products.update(id, { active: false }); }
+        );
     }
 }
 
