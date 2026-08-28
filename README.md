@@ -94,3 +94,11 @@ make build
 # Run the Vitest test suite
 make test
 ```
+
+### Contributing & Releases
+
+This project uses [Release Please](https://github.com/googleapis/release-please) to automate versioning, changelog generation, and NPM publishing. 
+
+When contributing, you **must** format your commit messages using [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) (e.g., `feat: add new resource`, `fix: handle edge case`). 
+
+When your PR is merged into `main`, Release Please will automatically open a "Release PR" bumping the semantic version and updating the `CHANGELOG.md`. Merging that Release PR will trigger the GitHub Action to cut a GitHub Release and publish the new version to NPM.
