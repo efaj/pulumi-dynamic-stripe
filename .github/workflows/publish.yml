@@ -1,8 +1,6 @@
 name: Publish to NPM
 
 on:
-  release:
-    types: [published]
   push:
     branches:
       - main
@@ -43,16 +41,3 @@ jobs:
         if: github.event_name == 'push'
         run: npm publish --access public --provenance --tag canary
 
-      - name: Publish to NPM (Release)
-        if: github.event_name == 'release'
-        run: npm publish --access public --provenance
-
-      - name: Pack NPM package
-        if: github.event_name == 'release'
-        run: npm pack
-
-      - name: Upload Release Asset
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: "*.tgz"
