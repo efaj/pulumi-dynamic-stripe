@@ -1,3 +1,5 @@
+export const INF = "inf" as const;
+
 export enum TaxBehavior {
     Inclusive = "inclusive",
     Exclusive = "exclusive",
