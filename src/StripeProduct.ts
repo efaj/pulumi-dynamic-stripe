@@ -7,6 +7,7 @@ export interface StripeProductArgs {
 	name: pulumi.Input<string>;
 	description?: pulumi.Input<string>;
 	taxCode?: pulumi.Input<string>;
+	metadata?: pulumi.Input<Record<string, string>>;
 }
 
 export interface StripeProductProviderArgs {
@@ -14,6 +15,7 @@ export interface StripeProductProviderArgs {
 	name: string;
 	description?: string;
 	taxCode?: string;
+	metadata?: Record<string, string>;
 }
 
 export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
@@ -26,6 +28,7 @@ export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
 			name: inputs.name,
 			description: inputs.description,
 			tax_code: inputs.taxCode,
+			...(inputs.metadata ? { metadata: inputs.metadata } : {}),
 		});
 
 		return {
@@ -47,6 +50,8 @@ export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
 		if (olds.name !== news.name) changes.push("name");
 		if (olds.description !== news.description) changes.push("description");
 		if (olds.taxCode !== news.taxCode) changes.push("taxCode");
+		if (JSON.stringify(olds.metadata) !== JSON.stringify(news.metadata))
+			changes.push("metadata");
 		if (olds.apiKey !== news.apiKey) changes.push("apiKey");
 
 		return {
@@ -66,6 +71,7 @@ export class StripeProductProvider implements pulumi.dynamic.ResourceProvider {
 			name: news.name,
 			description: news.description,
 			tax_code: news.taxCode,
+			...(news.metadata ? { metadata: news.metadata } : {}),
 		});
 
 		return {

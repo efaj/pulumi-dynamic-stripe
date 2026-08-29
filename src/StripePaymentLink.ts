@@ -5,8 +5,8 @@ import { safeDeactivateStripeResource } from "./utils";
 export interface StripePaymentLinkArgs {
 	apiKey: pulumi.Input<string>;
 	priceId: pulumi.Input<string>;
-	sparksAmount: pulumi.Input<string>;
 	redirectUrl: pulumi.Input<string>;
+	metadata?: pulumi.Input<Record<string, string>>;
 	allowPromotionCodes?: pulumi.Input<boolean>;
 	managedPayments?: pulumi.Input<boolean>;
 	automaticTax?: pulumi.Input<boolean>;
@@ -21,8 +21,8 @@ export interface StripePaymentLinkArgs {
 export interface StripePaymentLinkProviderArgs {
 	apiKey: string;
 	priceId: string;
-	sparksAmount: string;
 	redirectUrl: string;
+	metadata?: Record<string, string>;
 	allowPromotionCodes?: boolean;
 	managedPayments?: boolean;
 	automaticTax?: boolean;
@@ -67,9 +67,7 @@ export class StripePaymentLinkProvider
 				? { managed_payments: { enabled: true } }
 				: {}),
 			...(inputs.automaticTax ? { automatic_tax: { enabled: true } } : {}),
-			metadata: {
-				sparks: inputs.sparksAmount,
-			},
+			...(inputs.metadata ? { metadata: inputs.metadata } : {}),
 		});
 
 		return {
@@ -90,7 +88,8 @@ export class StripePaymentLinkProvider
 		const replaces: string[] = [];
 
 		if (olds.priceId !== news.priceId) replaces.push("priceId");
-		if (olds.sparksAmount !== news.sparksAmount) replaces.push("sparksAmount");
+		if (JSON.stringify(olds.metadata) !== JSON.stringify(news.metadata))
+			replaces.push("metadata");
 		if (olds.redirectUrl !== news.redirectUrl) replaces.push("redirectUrl");
 		if (olds.allowPromotionCodes !== news.allowPromotionCodes)
 			replaces.push("allowPromotionCodes");
@@ -143,8 +142,8 @@ export class PaymentLink extends pulumi.dynamic.Resource {
 			{
 				apiKey: args.apiKey,
 				priceId: args.priceId,
-				sparksAmount: args.sparksAmount,
 				redirectUrl: args.redirectUrl,
+				metadata: args.metadata,
 				allowPromotionCodes: args.allowPromotionCodes,
 				managedPayments: args.managedPayments,
 				automaticTax: args.automaticTax,

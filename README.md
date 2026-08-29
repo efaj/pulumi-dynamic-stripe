@@ -61,7 +61,10 @@ const premiumPrice = new Price("premium-price", {
 const premiumPaymentLink = new PaymentLink("premium-link", {
     apiKey: stripeApiKey,
     priceId: premiumPrice.priceId,
-    sparksAmount: "1000",
+    metadata: {
+        tier: "premium",
+        campaign: "summer_sale",
+    },
 });
 
 // Export the generated URL so it can be used in your application

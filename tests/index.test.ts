@@ -75,7 +75,7 @@ describe("Stripe Providers", () => {
 					inputs: {
 						apiKey: "sk_test_123",
 						priceId: "price_abc",
-						sparksAmount: "100",
+						metadata: { sparks: "100" },
 						redirectUrl: "https://example.com/success",
 						allowPromotionCodes: true,
 						managedPayments: true,
@@ -108,7 +108,7 @@ describe("Stripe Providers", () => {
 					inputs: {
 						apiKey: "sk_test_123",
 						priceId: "price_abc",
-						sparksAmount: "50",
+						metadata: { sparks: "50" },
 						redirectUrl: "https://example.com/success",
 					},
 					expectedPayload: {
@@ -136,7 +136,7 @@ describe("Stripe Providers", () => {
 					inputs: {
 						apiKey: "sk_test_123",
 						priceId: "price_abc",
-						sparksAmount: "100",
+						metadata: { sparks: "100" },
 						redirectUrl: "https://example.com/success",
 						quantity: 5,
 						adjustableQuantity: { enabled: true, maximum: 5 },
@@ -180,7 +180,7 @@ describe("Stripe Providers", () => {
 					name: "all properties change",
 					olds: {
 						priceId: "old",
-						sparksAmount: "10",
+						metadata: { sparks: "10" },
 						redirectUrl: "url1",
 						allowPromotionCodes: false,
 						managedPayments: false,
@@ -191,7 +191,7 @@ describe("Stripe Providers", () => {
 					},
 					news: {
 						priceId: "new",
-						sparksAmount: "20",
+						metadata: { sparks: "20" },
 						redirectUrl: "url2",
 						allowPromotionCodes: true,
 						managedPayments: true,
@@ -203,7 +203,7 @@ describe("Stripe Providers", () => {
 					expectedChanges: true,
 					expectedReplaces: [
 						"priceId",
-						"sparksAmount",
+						"metadata",
 						"redirectUrl",
 						"allowPromotionCodes",
 						"managedPayments",
@@ -215,15 +215,23 @@ describe("Stripe Providers", () => {
 				},
 				{
 					name: "some properties change",
-					olds: { priceId: "old", sparksAmount: "10", redirectUrl: "url1" },
-					news: { priceId: "old", sparksAmount: "20", redirectUrl: "url1" },
+					olds: {
+						priceId: "old",
+						metadata: { sparks: "10" },
+						redirectUrl: "url1",
+					},
+					news: {
+						priceId: "old",
+						metadata: { sparks: "20" },
+						redirectUrl: "url1",
+					},
 					expectedChanges: true,
-					expectedReplaces: ["sparksAmount"],
+					expectedReplaces: ["metadata"],
 				},
 				{
 					name: "quantity changes",
-					olds: { priceId: "same", sparksAmount: "10", quantity: 1 },
-					news: { priceId: "same", sparksAmount: "10", quantity: 2 },
+					olds: { priceId: "same", metadata: { sparks: "10" }, quantity: 1 },
+					news: { priceId: "same", metadata: { sparks: "10" }, quantity: 2 },
 					expectedChanges: true,
 					expectedReplaces: ["quantity"],
 				},
@@ -231,12 +239,12 @@ describe("Stripe Providers", () => {
 					name: "adjustableQuantity changes",
 					olds: {
 						priceId: "same",
-						sparksAmount: "10",
+						metadata: { sparks: "10" },
 						adjustableQuantity: { enabled: true, minimum: 1, maximum: 10 },
 					},
 					news: {
 						priceId: "same",
-						sparksAmount: "10",
+						metadata: { sparks: "10" },
 						adjustableQuantity: { enabled: true, minimum: 2, maximum: 10 },
 					},
 					expectedChanges: true,
@@ -244,8 +252,8 @@ describe("Stripe Providers", () => {
 				},
 				{
 					name: "no properties change",
-					olds: { priceId: "same", sparksAmount: "10" },
-					news: { priceId: "same", sparksAmount: "10" },
+					olds: { priceId: "same", metadata: { sparks: "10" } },
+					news: { priceId: "same", metadata: { sparks: "10" } },
 					expectedChanges: false,
 					expectedReplaces: [],
 				},

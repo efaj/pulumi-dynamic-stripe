@@ -37,6 +37,7 @@ export interface StripePriceArgs {
 	tiersMode?: pulumi.Input<TiersMode>;
 	tiers?: pulumi.Input<pulumi.Input<TierArgs>[]>;
 	transformQuantity?: pulumi.Input<TransformQuantityArgs>;
+	metadata?: pulumi.Input<Record<string, string>>;
 }
 
 export interface RecurringProviderArgs {
@@ -67,6 +68,7 @@ export interface StripePriceProviderArgs {
 	tiersMode?: TiersMode;
 	tiers?: TierProviderArgs[];
 	transformQuantity?: TransformQuantityProviderArgs;
+	metadata?: Record<string, string>;
 }
 
 export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
@@ -110,6 +112,7 @@ export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
 						},
 					}
 				: {}),
+			...(inputs.metadata ? { metadata: inputs.metadata } : {}),
 		});
 
 		return {
@@ -144,6 +147,8 @@ export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
 			JSON.stringify(news.transformQuantity)
 		)
 			replaces.push("transformQuantity");
+		if (JSON.stringify(olds.metadata) !== JSON.stringify(news.metadata))
+			replaces.push("metadata");
 		if (olds.apiKey !== news.apiKey) replaces.push("apiKey");
 
 		return {
