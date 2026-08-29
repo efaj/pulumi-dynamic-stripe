@@ -22,30 +22,38 @@ jobs:
         with:
           release-type: node
 
-      # If a release was created, checkout the code and publish to NPM
+      # Checkout and setup Node.js for publishing (runs for both Canary and Release)
       - name: Checkout repository
-        if: ${{ steps.release.outputs.release_created }}
         uses: actions/checkout@v7
 
       - name: Setup Node.js
-        if: ${{ steps.release.outputs.release_created }}
         uses: actions/setup-node@v7
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Upgrade NPM for OIDC support
-        if: ${{ steps.release.outputs.release_created }}
         run: npm install -g npm@latest
 
       - name: Install dependencies
-        if: ${{ steps.release.outputs.release_created }}
         run: npm ci
 
       - name: Build
-        if: ${{ steps.release.outputs.release_created }}
         run: npm run build
 
+      # --- CANARY PUBLISH STEPS ---
+      - name: Update version with SHA (Canary)
+        if: ${{ !steps.release.outputs.release_created }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          SHORT_SHA=${GITHUB_SHA::7}
+          npm version $VERSION-$SHORT_SHA --no-git-tag-version
+
+      - name: Publish to NPM (Canary)
+        if: ${{ !steps.release.outputs.release_created }}
+        run: npm publish --access public --provenance --tag canary
+
+      # --- STABLE RELEASE STEPS ---
       - name: Publish to NPM (Release)
         if: ${{ steps.release.outputs.release_created }}
         run: npm publish --access public --provenance
