@@ -1,6 +1,6 @@
 {
 	"name": "@efaj/pulumi-dynamic-stripe",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"description": "A Pulumi Dynamic Provider for Stripe, supporting modern features like Payment Links.",
 	"keywords": [
 		"pulumi",
