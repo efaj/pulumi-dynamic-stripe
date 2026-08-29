@@ -9,6 +9,7 @@ export interface StripePaymentLinkArgs {
     redirectUrl: pulumi.Input<string>;
     allowPromotionCodes?: pulumi.Input<boolean>;
     managedPayments?: pulumi.Input<boolean>;
+    automaticTax?: pulumi.Input<boolean>;
 }
 
 export interface StripePaymentLinkProviderArgs {
@@ -18,6 +19,7 @@ export interface StripePaymentLinkProviderArgs {
     redirectUrl: string;
     allowPromotionCodes?: boolean;
     managedPayments?: boolean;
+    automaticTax?: boolean;
 }
 
 export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvider {
@@ -42,6 +44,7 @@ export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvide
             },
             allow_promotion_codes: inputs.allowPromotionCodes,
             ...(inputs.managedPayments ? { managed_payments: { enabled: true } } : {}),
+            ...(inputs.automaticTax ? { automatic_tax: { enabled: true } } : {}),
             metadata: {
                 sparks: inputs.sparksAmount
             }
@@ -65,6 +68,7 @@ export class StripePaymentLinkProvider implements pulumi.dynamic.ResourceProvide
         if (olds.redirectUrl !== news.redirectUrl) replaces.push("redirectUrl");
         if (olds.allowPromotionCodes !== news.allowPromotionCodes) replaces.push("allowPromotionCodes");
         if (olds.managedPayments !== news.managedPayments) replaces.push("managedPayments");
+        if (olds.automaticTax !== news.automaticTax) replaces.push("automaticTax");
         if (olds.apiKey !== news.apiKey) replaces.push("apiKey");
         
         return {
@@ -97,6 +101,7 @@ export class PaymentLink extends pulumi.dynamic.Resource {
             redirectUrl: args.redirectUrl,
             allowPromotionCodes: args.allowPromotionCodes,
             managedPayments: args.managedPayments,
+            automaticTax: args.automaticTax,
             paymentLinkId: undefined,
             url: undefined,
         }, opts);

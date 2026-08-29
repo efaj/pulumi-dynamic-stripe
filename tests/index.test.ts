@@ -62,6 +62,7 @@ describe("Stripe Providers", () => {
                         redirectUrl: "https://example.com/success",
                         allowPromotionCodes: true,
                         managedPayments: true,
+                        automaticTax: true,
                     },
                     expectedPayload: {
                         line_items: [{
@@ -72,6 +73,7 @@ describe("Stripe Providers", () => {
                         after_completion: { type: 'redirect', redirect: { url: "https://example.com/success" } },
                         allow_promotion_codes: true,
                         managed_payments: { enabled: true },
+                        automatic_tax: { enabled: true },
                         metadata: { sparks: "100" }
                     }
                 },
@@ -112,10 +114,10 @@ describe("Stripe Providers", () => {
             const diffCases = [
                 {
                     name: "all properties change",
-                    olds: { priceId: "old", sparksAmount: "10", redirectUrl: "url1", allowPromotionCodes: false, managedPayments: false, apiKey: "old_key" },
-                    news: { priceId: "new", sparksAmount: "20", redirectUrl: "url2", allowPromotionCodes: true, managedPayments: true, apiKey: "new_key" },
+                    olds: { priceId: "old", sparksAmount: "10", redirectUrl: "url1", allowPromotionCodes: false, managedPayments: false, automaticTax: false, apiKey: "old_key" },
+                    news: { priceId: "new", sparksAmount: "20", redirectUrl: "url2", allowPromotionCodes: true, managedPayments: true, automaticTax: true, apiKey: "new_key" },
                     expectedChanges: true,
-                    expectedReplaces: ["priceId", "sparksAmount", "redirectUrl", "allowPromotionCodes", "managedPayments", "apiKey"]
+                    expectedReplaces: ["priceId", "sparksAmount", "redirectUrl", "allowPromotionCodes", "managedPayments", "automaticTax", "apiKey"]
                 },
                 {
                     name: "some properties change",
@@ -406,6 +408,22 @@ describe("Stripe Providers", () => {
         describe("create", () => {
             const createCases = [
                 {
+                    name: "all properties provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        productId: "prod_123",
+                        unitAmount: 1000,
+                        currency: "usd",
+                        taxBehavior: "inclusive",
+                    },
+                    expectedPayload: {
+                        product: "prod_123",
+                        unit_amount: 1000,
+                        currency: "usd",
+                        tax_behavior: "inclusive",
+                    }
+                },
+                {
                     name: "required properties provided",
                     inputs: {
                         apiKey: "sk_test_123",
@@ -417,6 +435,63 @@ describe("Stripe Providers", () => {
                         product: "prod_123",
                         unit_amount: 1000,
                         currency: "usd",
+                        tax_behavior: undefined,
+                    }
+                },
+                {
+                    name: "recurring pricing provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        productId: "prod_123",
+                        unitAmount: 1000,
+                        currency: "usd",
+                        recurring: { interval: "month", intervalCount: 1, usageType: "licensed" }
+                    },
+                    expectedPayload: {
+                        product: "prod_123",
+                        unit_amount: 1000,
+                        currency: "usd",
+                        recurring: { interval: "month", interval_count: 1, usage_type: "licensed" }
+                    }
+                },
+                {
+                    name: "tiered pricing provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        productId: "prod_123",
+                        currency: "usd",
+                        billingScheme: "tiered",
+                        tiersMode: "volume",
+                        tiers: [
+                            { upTo: 10, unitAmount: 1000 },
+                            { upTo: "inf", unitAmount: 800 }
+                        ]
+                    },
+                    expectedPayload: {
+                        product: "prod_123",
+                        currency: "usd",
+                        billing_scheme: "tiered",
+                        tiers_mode: "volume",
+                        tiers: [
+                            { up_to: 10, unit_amount: 1000, flat_amount: undefined },
+                            { up_to: "inf", unit_amount: 800, flat_amount: undefined }
+                        ]
+                    }
+                },
+                {
+                    name: "package pricing provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        productId: "prod_123",
+                        unitAmount: 5000,
+                        currency: "usd",
+                        transformQuantity: { divideBy: 5, round: "up" }
+                    },
+                    expectedPayload: {
+                        product: "prod_123",
+                        unit_amount: 5000,
+                        currency: "usd",
+                        transform_quantity: { divide_by: 5, round: "up" }
                     }
                 }
             ];
@@ -436,10 +511,17 @@ describe("Stripe Providers", () => {
             const diffCases = [
                 {
                     name: "all properties change",
-                    olds: { productId: "prod_1", unitAmount: 100, currency: "usd", apiKey: "old_key" },
-                    news: { productId: "prod_2", unitAmount: 200, currency: "eur", apiKey: "new_key" },
+                    olds: { productId: "prod_1", unitAmount: 100, currency: "usd", taxBehavior: "inclusive", apiKey: "old_key" },
+                    news: { productId: "prod_2", unitAmount: 200, currency: "eur", taxBehavior: "exclusive", apiKey: "new_key" },
                     expectedChanges: true,
-                    expectedReplaces: ["productId", "unitAmount", "currency", "apiKey"]
+                    expectedReplaces: ["productId", "unitAmount", "currency", "taxBehavior", "apiKey"]
+                },
+                {
+                    name: "pricing models properties change",
+                    olds: { productId: "prod_1", currency: "usd", recurring: { interval: "month" }, billingScheme: "per_unit", tiersMode: "volume", tiers: [{ upTo: 10 }], transformQuantity: { divideBy: 5 } },
+                    news: { productId: "prod_1", currency: "usd", recurring: { interval: "year" }, billingScheme: "tiered", tiersMode: "graduated", tiers: [{ upTo: 20 }], transformQuantity: { divideBy: 10 } },
+                    expectedChanges: true,
+                    expectedReplaces: ["recurring", "billingScheme", "tiersMode", "tiers", "transformQuantity"]
                 },
                 {
                     name: "some properties change",

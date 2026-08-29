@@ -1,19 +1,66 @@
 import * as pulumi from "@pulumi/pulumi";
 import Stripe from "stripe";
 import { safeDeactivateStripeResource } from "./utils";
+import { TaxBehavior, BillingScheme, TiersMode, RecurringInterval, UsageType } from "./enums";
+
+export interface RecurringArgs {
+    interval: pulumi.Input<RecurringInterval>;
+    intervalCount?: pulumi.Input<number>;
+    usageType?: pulumi.Input<UsageType>;
+}
+
+export interface TierArgs {
+    upTo: pulumi.Input<number | "inf">;
+    unitAmount?: pulumi.Input<number>;
+    flatAmount?: pulumi.Input<number>;
+}
+
+export interface TransformQuantityArgs {
+    divideBy: pulumi.Input<number>;
+    round: pulumi.Input<"up" | "down">;
+}
 
 export interface StripePriceArgs {
     apiKey: pulumi.Input<string>;
     productId: pulumi.Input<string>;
-    unitAmount: pulumi.Input<number>;
     currency: pulumi.Input<string>;
+    unitAmount?: pulumi.Input<number>;
+    taxBehavior?: pulumi.Input<TaxBehavior>;
+    recurring?: pulumi.Input<RecurringArgs>;
+    billingScheme?: pulumi.Input<BillingScheme>;
+    tiersMode?: pulumi.Input<TiersMode>;
+    tiers?: pulumi.Input<pulumi.Input<TierArgs>[]>;
+    transformQuantity?: pulumi.Input<TransformQuantityArgs>;
+}
+
+export interface RecurringProviderArgs {
+    interval: RecurringInterval;
+    intervalCount?: number;
+    usageType?: UsageType;
+}
+
+export interface TierProviderArgs {
+    upTo: number | "inf";
+    unitAmount?: number;
+    flatAmount?: number;
+}
+
+export interface TransformQuantityProviderArgs {
+    divideBy: number;
+    round: "up" | "down";
 }
 
 export interface StripePriceProviderArgs {
     apiKey: string;
     productId: string;
-    unitAmount: number;
     currency: string;
+    unitAmount?: number;
+    taxBehavior?: TaxBehavior;
+    recurring?: RecurringProviderArgs;
+    billingScheme?: BillingScheme;
+    tiersMode?: TiersMode;
+    tiers?: TierProviderArgs[];
+    transformQuantity?: TransformQuantityProviderArgs;
 }
 
 export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
@@ -22,8 +69,31 @@ export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
         
         const price = await stripe.prices.create({
             product: inputs.productId,
-            unit_amount: inputs.unitAmount,
             currency: inputs.currency,
+            ...(inputs.unitAmount !== undefined ? { unit_amount: inputs.unitAmount } : {}),
+            tax_behavior: inputs.taxBehavior,
+            ...(inputs.recurring ? { 
+                recurring: { 
+                    interval: inputs.recurring.interval,
+                    interval_count: inputs.recurring.intervalCount,
+                    usage_type: inputs.recurring.usageType,
+                } 
+            } : {}),
+            billing_scheme: inputs.billingScheme,
+            tiers_mode: inputs.tiersMode,
+            ...(inputs.tiers ? { 
+                tiers: inputs.tiers.map(t => ({
+                    up_to: t.upTo,
+                    unit_amount: t.unitAmount,
+                    flat_amount: t.flatAmount,
+                }))
+            } : {}),
+            ...(inputs.transformQuantity ? {
+                transform_quantity: {
+                    divide_by: inputs.transformQuantity.divideBy,
+                    round: inputs.transformQuantity.round,
+                }
+            } : {}),
         });
         
         return {
@@ -41,6 +111,12 @@ export class StripePriceProvider implements pulumi.dynamic.ResourceProvider {
         if (olds.productId !== news.productId) replaces.push("productId");
         if (olds.unitAmount !== news.unitAmount) replaces.push("unitAmount");
         if (olds.currency !== news.currency) replaces.push("currency");
+        if (olds.taxBehavior !== news.taxBehavior) replaces.push("taxBehavior");
+        if (JSON.stringify(olds.recurring) !== JSON.stringify(news.recurring)) replaces.push("recurring");
+        if (olds.billingScheme !== news.billingScheme) replaces.push("billingScheme");
+        if (olds.tiersMode !== news.tiersMode) replaces.push("tiersMode");
+        if (JSON.stringify(olds.tiers) !== JSON.stringify(news.tiers)) replaces.push("tiers");
+        if (JSON.stringify(olds.transformQuantity) !== JSON.stringify(news.transformQuantity)) replaces.push("transformQuantity");
         if (olds.apiKey !== news.apiKey) replaces.push("apiKey");
         
         return {
