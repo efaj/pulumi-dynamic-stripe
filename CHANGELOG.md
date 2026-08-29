@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/efaj/pulumi-dynamic-stripe/compare/v0.2.1...v0.2.2) (2026-08-29)
+
+
+### Bug Fixes
+
+* bump version to 0.2.2 to trigger stable release ([4b9443f](https://github.com/efaj/pulumi-dynamic-stripe/commit/4b9443f2578b1b08dae6169f6324f15031e5b842))
+
 ## [0.2.1](https://github.com/efaj/pulumi-dynamic-stripe/compare/v0.2.0...v0.2.1) (2026-08-29)
 
 
