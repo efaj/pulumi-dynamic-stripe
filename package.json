@@ -1,36 +1,39 @@
 {
-  "name": "@efaj/pulumi-dynamic-stripe",
-  "version": "0.1.0",
-  "description": "A Pulumi Dynamic Provider for Stripe, supporting modern features like Payment Links.",
-  "keywords": [
-    "pulumi",
-    "stripe"
-  ],
-  "homepage": "https://github.com/efaj/pulumi-dynamic-stripe#readme",
-  "bugs": {
-    "url": "https://github.com/efaj/pulumi-dynamic-stripe/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/efaj/pulumi-dynamic-stripe.git"
-  },
-  "license": "MIT",
-  "author": "Emmanuel Abarca Jimenez <efaj@crenet.games> (https://crenet.games/emmanuel)",
-  "type": "commonjs",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc",
-    "prepare": "tsc",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@pulumi/pulumi": "^3.259.0",
-    "stripe": "^22.6.0"
-  },
-  "devDependencies": {
-    "@types/node": "^26.4.0",
-    "vitest": "^2.0.5",
-    "typescript": "^6.0.3"
-  }
+	"name": "@efaj/pulumi-dynamic-stripe",
+	"version": "0.1.0",
+	"description": "A Pulumi Dynamic Provider for Stripe, supporting modern features like Payment Links.",
+	"keywords": [
+		"pulumi",
+		"stripe"
+	],
+	"homepage": "https://github.com/efaj/pulumi-dynamic-stripe#readme",
+	"bugs": {
+		"url": "https://github.com/efaj/pulumi-dynamic-stripe/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/efaj/pulumi-dynamic-stripe.git"
+	},
+	"license": "MIT",
+	"author": "Emmanuel Abarca Jimenez <efaj@crenet.games> (https://crenet.games/emmanuel)",
+	"type": "commonjs",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"prepare": "tsc",
+		"test": "vitest run",
+		"lint": "biome check .",
+		"format": "biome format --write ."
+	},
+	"dependencies": {
+		"@pulumi/pulumi": "^3.259.0",
+		"stripe": "^22.6.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.11",
+		"@types/node": "^26.4.0",
+		"typescript": "^6.0.3",
+		"vitest": "^2.0.5"
+	}
 }

@@ -1,12 +1,15 @@
-.PHONY: all install build test clean
+.PHONY: all install build lint test clean
 
-all: install build test
+all: install build lint test
 
 install:
 	npm install
 
 build:
 	npm run build
+
+lint:
+	npm run lint
 
 test:
 	npm test

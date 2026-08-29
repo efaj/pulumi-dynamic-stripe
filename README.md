@@ -91,6 +91,9 @@ make install
 # Build the TypeScript source
 make build
 
+# Lint the codebase
+make lint
+
 # Run the Vitest test suite
 make test
 ```
