@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/efaj/pulumi-dynamic-stripe/compare/v0.2.0...v0.2.1) (2026-08-29)
+
+
+### Bug Fixes
+
+* ensure package can be published to public npm registry ([10314d3](https://github.com/efaj/pulumi-dynamic-stripe/commit/10314d3b425ae2ea1466eddea5e40d9af2d2dfd8))
+
 ## [0.2.0](https://github.com/efaj/pulumi-dynamic-stripe/compare/v0.1.0...v0.2.0) (2026-08-29)
 
 
