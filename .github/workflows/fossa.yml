@@ -24,6 +24,7 @@ jobs:
       - name: Filter out devDependencies
         run: |
           npm pkg delete devDependencies
+          npm pkg delete scripts.prepare
           npm install --package-lock-only
           npm ci --ignore-scripts
 
