@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/efaj/pulumi-dynamic-stripe/compare/v0.2.2...v0.2.3) (2026-08-29)
+
+
+### Bug Fixes
+
+* **leak:** fixed an exposed an specific use case via specific "sparks" metadata ([a1dc919](https://github.com/efaj/pulumi-dynamic-stripe/commit/a1dc9193b64c7fc6246b13988862b2f41ae1286a))
+
 ## [0.2.2](https://github.com/efaj/pulumi-dynamic-stripe/compare/v0.2.1...v0.2.2) (2026-08-29)
 
 
