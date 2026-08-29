@@ -95,6 +95,27 @@ describe("Stripe Providers", () => {
                         allow_promotion_codes: undefined,
                         metadata: { sparks: "50" }
                     }
+                },
+                {
+                    name: "custom quantity and adjustableQuantity provided",
+                    inputs: {
+                        apiKey: "sk_test_123",
+                        priceId: "price_abc",
+                        sparksAmount: "100",
+                        redirectUrl: "https://example.com/success",
+                        quantity: 5,
+                        adjustableQuantity: { enabled: true, maximum: 5 }
+                    },
+                    expectedPayload: {
+                        line_items: [{
+                            price: "price_abc",
+                            quantity: 5,
+                            adjustable_quantity: { enabled: true, maximum: 5 },
+                        }],
+                        after_completion: { type: 'redirect', redirect: { url: "https://example.com/success" } },
+                        allow_promotion_codes: undefined,
+                        metadata: { sparks: "100" }
+                    }
                 }
             ];
 
@@ -114,10 +135,10 @@ describe("Stripe Providers", () => {
             const diffCases = [
                 {
                     name: "all properties change",
-                    olds: { priceId: "old", sparksAmount: "10", redirectUrl: "url1", allowPromotionCodes: false, managedPayments: false, automaticTax: false, apiKey: "old_key" },
-                    news: { priceId: "new", sparksAmount: "20", redirectUrl: "url2", allowPromotionCodes: true, managedPayments: true, automaticTax: true, apiKey: "new_key" },
+                    olds: { priceId: "old", sparksAmount: "10", redirectUrl: "url1", allowPromotionCodes: false, managedPayments: false, automaticTax: false, quantity: 1, adjustableQuantity: { enabled: true }, apiKey: "old_key" },
+                    news: { priceId: "new", sparksAmount: "20", redirectUrl: "url2", allowPromotionCodes: true, managedPayments: true, automaticTax: true, quantity: 2, adjustableQuantity: { enabled: false }, apiKey: "new_key" },
                     expectedChanges: true,
-                    expectedReplaces: ["priceId", "sparksAmount", "redirectUrl", "allowPromotionCodes", "managedPayments", "automaticTax", "apiKey"]
+                    expectedReplaces: ["priceId", "sparksAmount", "redirectUrl", "allowPromotionCodes", "managedPayments", "automaticTax", "apiKey", "quantity", "adjustableQuantity"]
                 },
                 {
                     name: "some properties change",
@@ -125,6 +146,20 @@ describe("Stripe Providers", () => {
                     news: { priceId: "old", sparksAmount: "20", redirectUrl: "url1" },
                     expectedChanges: true,
                     expectedReplaces: ["sparksAmount"]
+                },
+                {
+                    name: "quantity changes",
+                    olds: { priceId: "same", sparksAmount: "10", quantity: 1 },
+                    news: { priceId: "same", sparksAmount: "10", quantity: 2 },
+                    expectedChanges: true,
+                    expectedReplaces: ["quantity"]
+                },
+                {
+                    name: "adjustableQuantity changes",
+                    olds: { priceId: "same", sparksAmount: "10", adjustableQuantity: { enabled: true, minimum: 1, maximum: 10 } },
+                    news: { priceId: "same", sparksAmount: "10", adjustableQuantity: { enabled: true, minimum: 2, maximum: 10 } },
+                    expectedChanges: true,
+                    expectedReplaces: ["adjustableQuantity"]
                 },
                 {
                     name: "no properties change",
