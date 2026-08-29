@@ -57,14 +57,3 @@ jobs:
       - name: Publish to NPM (Release)
         if: ${{ steps.release.outputs.release_created }}
         run: npm publish --access public --provenance
-
-      - name: Pack NPM package
-        if: ${{ steps.release.outputs.release_created }}
-        run: npm pack
-
-      - name: Upload Release Asset
-        if: ${{ steps.release.outputs.release_created }}
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ steps.release.outputs.tag_name }}
-          files: "*.tgz"
