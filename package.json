@@ -33,7 +33,7 @@
 	},
 	"dependencies": {
 		"@pulumi/pulumi": "^3.259.0",
-		"stripe": "^22.6.0"
+		"stripe": "^23.0.0"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.11",
