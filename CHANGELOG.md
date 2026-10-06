@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/efaj/pulumi-dynamic-stripe/compare/v0.2.3...v0.2.4) (2026-10-06)
+
+
+### Bug Fixes
+
+* **Serializer:** Avoid serializer issues by downgrading ES2019 ([c68d1b3](https://github.com/efaj/pulumi-dynamic-stripe/commit/c68d1b3c73b366670d8c2139ac20f95fa8e865ec))
+
 ## [0.2.3](https://github.com/efaj/pulumi-dynamic-stripe/compare/v0.2.2...v0.2.3) (2026-08-29)
 
 
