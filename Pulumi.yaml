@@ -1,0 +1,4 @@
+name: pulumi-dynamic-stripe-test
+runtime: nodejs
+backend:
+  url: file://~
