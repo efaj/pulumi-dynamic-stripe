@@ -36,7 +36,7 @@
 		"stripe": "^23.0.0"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.11",
+		"@biomejs/biome": "2.5.15",
 		"@types/node": "^26.4.0",
 		"typescript": "^5.5.4",
 		"vite": "^6.4.3",
